@@ -1,6 +1,11 @@
 {
-  "name": "explosion",
-  "displayName": "explosion",
+  "name": "xplosion",
+  "displayName": "Xplosion",
+  "publisher": "Ruoqi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huangruoqi/explosion.git"
+  },
   "description": "Make typing explode",
   "version": "0.0.1",
   "engines": {
@@ -14,10 +19,12 @@
   ],
   "main": "./extension.js",
   "contributes": {
-    "commands": [{
-      "command": "explosion.helloWorld",
-      "title": "Hello World"
-    }]
+    "commands": [
+      {
+        "command": "explosion.helloWorld",
+        "title": "Hello World"
+      }
+    ]
   },
   "scripts": {
     "lint": "eslint .",
@@ -31,5 +38,6 @@
     "eslint": "^9.13.0",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1"
-  }
+  },
+  "license": "MIT"
 }
