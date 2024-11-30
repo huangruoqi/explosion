@@ -1,56 +1,101 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
+const player = require('play-sound')();
+const path = require('path');
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 
-/**
- * @param {vscode.ExtensionContext} context
- */
 function activate(context) {
+  console.log("Xplosion Activated!")
 
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log('Congratulations, your extension "explosion" is now active!');
-  const explosionDecoration = vscode.window.createTextEditorDecorationType({
-    after: {
-      contentIconPath: vscode.Uri.file(context.asAbsolutePath('images/a.gif')), // Path to your image
-      textDecoration: `none; position: absolute;`,
-      margin: '-100px 0 0 -100px'
-    },
-  });
+  // const soundUri = vscode.Uri.file(context.asAbsolutePath('media/explosion.mp3'));
+  // const soundPath = soundUri.toString();
+  const soundPath = path.join(__dirname, 'media', 'explosion_10.mp3');
+
+  let audioCounter = 0;
+  const alwaysPlayCount = 5;
+  const resetInterval = 500; // ms
+  let lastPlayTime = Date.now();
+
+  function playSound() {
+    const now = Date.now();
+    if (now - lastPlayTime > resetInterval) {
+      audioCounter = 0;
+    }
+    lastPlayTime = now;
+    if (audioCounter > alwaysPlayCount && Math.random() > 1/Math.sqrt(audioCounter-alwaysPlayCount)) {
+      return;
+    }
+    audioCounter++;
+    console.log(audioCounter);
+    player.play(soundPath, (err) => {
+      if (err) console.error('Error playing audio 1:', err);
+      else {
+        audioCounter--;
+      }
+    });
+  }
+
+
+  const frames = [
+    '01.gif',
+    '02.gif',
+    '03.gif',
+    '04.gif',
+    '05.gif',
+    '06.gif',
+    '07.gif',
+    '08.gif',
+    '09.gif',
+    '10.gif',
+    '11.gif',
+    '12.gif',
+  ];
+  const maxFrame = frames.length - 1;
+  const frameDuration = 80; // Duration per frame in milliseconds
+
+
+  function playAnimation(editor, range) {
+    playSound();
+    const frame2Decorations = frames.map(fileName => vscode.window.createTextEditorDecorationType({
+      after: {
+        contentIconPath: vscode.Uri.file(context.asAbsolutePath(`images/${fileName}`)),
+        textDecoration: 'none; position: absolute;',
+        margin: '0 0 0 -15px'
+      },
+    }));
+    let currentFrame = 0;
+    function updateFrame() {
+      if (currentFrame !== 0) {
+        editor.setDecorations(frame2Decorations[currentFrame - 1], []);
+      }
+      if (currentFrame !== maxFrame) {
+        editor.setDecorations(frame2Decorations[currentFrame], [range]);
+        setTimeout(updateFrame, frameDuration);
+      }
+      currentFrame++;
+    }
+    updateFrame();
+  }
   vscode.workspace.onDidChangeTextDocument((event) => {
     const editor = vscode.window.activeTextEditor;
-    if (!editor || event.document !== editor.document) return;
+    editor.setDecorations
+    if (!editor) return;
 
     const changes = event.contentChanges;
     if (changes.length > 0) {
       const lastChange = changes[changes.length - 1];
       const startPos = lastChange.range.start;
-
-      // Overlay the image on the text position
       const range = new vscode.Range(startPos, startPos.translate(0, lastChange.text.length));
-      editor.setDecorations(explosionDecoration, [range]);
-
-      // Clear the overlay after a short delay (if desired)
-      setTimeout(() => {
-        editor.setDecorations(explosionDecoration, []);
-      }, 500); // Adjust duration as needed
+      // Start the frame-by-frame animation
+      playAnimation(editor, range);
     }
   });
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with  registerCommand
-  // The commandId parameter must match the command field in package.json
-  const disposable = vscode.commands.registerCommand('explosion.helloWorld', function () {
-    // The code you place here will be executed every time your command is executed
-
-    // Display a message box to the user
-    vscode.window.showInformationMessage('Hello World from explosion!');
-  });
-
-  context.subscriptions.push(disposable);
 }
+
+
 
 // This method is called when your extension is deactivated
 function deactivate() { }
