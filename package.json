@@ -7,7 +7,7 @@
     "url": "https://github.com/huangruoqi/explosion.git"
   },
   "description": "Make typing explode",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.95.0"
   },
@@ -21,15 +21,11 @@
   "contributes": {
     "commands": [
       {
-        "command": "explosion.helloWorld",
-        "title": "Hello World"
+        "command": "explosion.shakeScreen",
+        "title": "Shake"
       }
     ]
   },
-  "files": [
-    "media/explosion_10.mp3",
-    "images/*.gif"
-  ],
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",

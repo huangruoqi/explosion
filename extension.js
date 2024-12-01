@@ -15,7 +15,7 @@ function activate(context) {
   const soundPath = path.join(__dirname, 'media', 'explosion_10.mp3');
 
   let audioCounter = 0;
-  const alwaysPlayCount = 5;
+  const alwaysPlayCount = 3;
   const resetInterval = 500; // ms
   let lastPlayTime = Date.now();
 
@@ -25,7 +25,7 @@ function activate(context) {
       audioCounter = 0;
     }
     lastPlayTime = now;
-    if (audioCounter > alwaysPlayCount && Math.random() > 1/Math.sqrt(audioCounter-alwaysPlayCount)) {
+    if (audioCounter > alwaysPlayCount && Math.random() > 1 / Math.sqrt(audioCounter - alwaysPlayCount)) {
       return;
     }
     audioCounter++;
@@ -38,8 +38,8 @@ function activate(context) {
     });
   }
 
-
-  const frames = [
+  const frameDuration = 80;
+  const removeFrames = [
     '01.gif',
     '02.gif',
     '03.gif',
@@ -53,11 +53,10 @@ function activate(context) {
     '11.gif',
     '12.gif',
   ];
-  const maxFrame = frames.length - 1;
-  const frameDuration = 80; // Duration per frame in milliseconds
 
 
-  function playAnimation(editor, range) {
+  function playAnimation(frames, editor, range) {
+    const maxFrame = frames.length - 1;
     playSound();
     const frame2Decorations = frames.map(fileName => vscode.window.createTextEditorDecorationType({
       after: {
@@ -81,16 +80,25 @@ function activate(context) {
   }
   vscode.workspace.onDidChangeTextDocument((event) => {
     const editor = vscode.window.activeTextEditor;
-    editor.setDecorations
     if (!editor) return;
 
     const changes = event.contentChanges;
+    
     if (changes.length > 0) {
       const lastChange = changes[changes.length - 1];
-      const startPos = lastChange.range.start;
-      const range = new vscode.Range(startPos, startPos.translate(0, lastChange.text.length));
-      // Start the frame-by-frame animation
-      playAnimation(editor, range);
+      if (lastChange.text && lastChange.rangeLength===0) {
+        // insert animation
+        const startPos = lastChange.range.start;
+        const range = new vscode.Range(startPos, startPos.translate(0, lastChange.text.length));
+        playAnimation(removeFrames, editor, range);
+      }
+      else if (!lastChange.text && lastChange.rangeLength > 0) {
+        // delete animation
+        playAnimation(removeFrames, editor, lastChange.range);
+      }
+      else if (!lastChange.text && lastChange.rangeLength >0) {
+        // replace animation
+      }
     }
   });
 }
@@ -98,7 +106,8 @@ function activate(context) {
 
 
 // This method is called when your extension is deactivated
-function deactivate() { }
+function deactivate() {
+}
 
 module.exports = {
   activate,
